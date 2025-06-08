@@ -29,7 +29,8 @@ import { NotesGridSkeleton } from "~/components/notes/note-skeleton";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await requireUserId(request);
-  const { notes } = await getNotesByUserId(userId);
+  let { notes } = await getNotesByUserId(userId, { limit: 1000 });
+  notes = notes.sort((a, b) => b.isFavorite - a.isFavorite);
   return json({ notes });
 }
 

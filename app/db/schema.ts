@@ -28,6 +28,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  isFavorite: integer("is_favorite").default(0).notNull(),
 });
 
 /**
@@ -41,6 +42,7 @@ export const notes = pgTable("notes", {
   title: text("title").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  isFavorite: integer("is_favorite").default(0).notNull(),
 });
 
 /**
