@@ -5,13 +5,17 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { type NoteForm } from "~/schemas/notes";
+import { type Note } from "~/db/schema";
+
+type SerializedNote = Omit<Note, "createdAt"> & { createdAt: string };
 
 interface NoteFormProps {
   defaultValues?: Partial<NoteForm>;
+  note?: SerializedNote;
   onSuccess?: () => void;
 }
 
-export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
+export function NoteForm({ defaultValues = {}, note, onSuccess }: NoteFormProps) {
   const actionData = useActionData<{
     success: boolean;
     errors?: Record<string, string[]>;
@@ -30,12 +34,13 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
 
   return (
     <Form ref={formRef} method="post" className="space-y-4">
+      {note && <input type="hidden" name="intent" value="update" />}
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input
           id="title"
           name="title"
-          defaultValue={defaultValues.title}
+          defaultValue={note?.title || defaultValues.title}
           required
           maxLength={255}
           className="focus:border-[#c2e7d9] focus:ring-[#c2e7d9]"
@@ -54,7 +59,7 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
         <Textarea
           id="description"
           name="description"
-          defaultValue={defaultValues.description}
+          defaultValue={note?.description || defaultValues.description}
           required
           rows={5}
           maxLength={10000}
@@ -76,7 +81,7 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
           disabled={isSubmitting}
           className="bg-[#c2e7d9] text-gray-800 hover:bg-[#afdfd0] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-semibold rounded-xl"
         >
-          {isSubmitting ? "Saving..." : "Save Note"}
+          {isSubmitting ? "Saving..." : note ? "Update Note" : "Save Note"}
         </Button>
         <Link
           to="/notes"
