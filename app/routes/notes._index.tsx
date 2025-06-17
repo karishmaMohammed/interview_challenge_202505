@@ -29,7 +29,8 @@ import { NotesGridSkeleton } from "~/components/notes/note-skeleton";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await requireUserId(request);
-  const { notes } = await getNotesByUserId(userId);
+  let { notes } = await getNotesByUserId(userId, { limit: 1000 });
+  notes = notes.sort((a, b) => b.isFavorite - a.isFavorite);
   return json({ notes });
 }
 
@@ -94,8 +95,9 @@ export default function NotesIndexPage() {
                   setIsOpen(true);
                 }}
                 disabled={isLoading}
+                className="bg-[#c2e7d9] text-gray-800 hover:bg-[#afdfd0] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-semibold rounded-xl"
               >
-                <PlusIcon className="mr-2 h-4 w-4" />
+                <PlusIcon className="mr-1.5 h-4 w-4" />
                 Create Note
               </Button>
             </div>
@@ -112,6 +114,7 @@ export default function NotesIndexPage() {
                   size="sm"
                   onClick={() => setIsOpen(false)}
                   disabled={isLoading}
+                  className="bg-[#ffd7d7] text-gray-800 hover:bg-[#ffc7c7] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 rounded-xl"
                 >
                   Cancel
                 </Button>

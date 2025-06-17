@@ -28,6 +28,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  isFavorite: integer("is_favorite").default(0).notNull(),
 });
 
 /**
@@ -41,6 +42,7 @@ export const notes = pgTable("notes", {
   title: text("title").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  isFavorite: integer("is_favorite").default(0).notNull(),
 });
 
 /**
@@ -87,6 +89,15 @@ export const queries = {
       db
         .select()
         .from(notes)
-        .where(sql`${notes.userId} = ${userId}`),
+        .where(sql`${notes.userId} = ${userId}`)
+        .orderBy(sql`${notes.isFavorite} DESC, ${notes.createdAt} DESC`),
+    toggleFavorite: (noteId: number, userId: number) =>
+      db
+        .update(notes)
+        .set({
+          isFavorite: sql`CASE WHEN ${notes.isFavorite} = 0 THEN 1 ELSE 0 END`,
+        })
+        .where(sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userId}`)
+        .returning(),
   },
 };

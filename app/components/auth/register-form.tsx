@@ -8,28 +8,28 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { type LoginForm } from "~/schemas/auth";
 
-interface LoginFormProps {
+interface RegisterFormProps {
   redirectTo: string;
   errors?: {
     email?: string[];
     password?: string[];
+    confirmPassword?: string[];
   };
   isSubmitting: boolean;
 }
 
-export function LoginForm({
+export function RegisterForm({
   redirectTo,
   errors,
   isSubmitting,
-}: LoginFormProps) {
+}: RegisterFormProps) {
   return (
     <Card className="w-full bg-white rounded-3xl shadow-lg border-0">
       <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-3xl font-bold text-center text-gray-800">Welcome back</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center text-gray-800">Create account</CardTitle>
         <p className="text-center text-gray-600">
-          Enter your email and password to sign in
+          Enter your details to register
         </p>
       </CardHeader>
       <CardContent>
@@ -62,7 +62,7 @@ export function LoginForm({
               name="password"
               type="password"
               placeholder="••••••"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#c2e7d9] focus:ring-[#c2e7d9] text-gray-800 bg-white"
               aria-describedby={errors?.password ? "password-error" : undefined}
@@ -74,22 +74,41 @@ export function LoginForm({
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="••••••"
+              autoComplete="new-password"
+              required
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#c2e7d9] focus:ring-[#c2e7d9] text-gray-800 bg-white"
+              aria-describedby={errors?.confirmPassword ? "confirm-password-error" : undefined}
+            />
+            {errors?.confirmPassword && (
+              <p className="text-sm text-red-500" id="confirm-password-error">
+                {errors.confirmPassword[0]}
+              </p>
+            )}
+          </div>
+
           <Button 
             type="submit" 
             className="w-full bg-[#c2e7d9] hover:bg-[#afdfd0] text-gray-800 font-semibold py-3 rounded-lg transition-colors"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Creating account..." : "Create account"}
           </Button>
 
           <p className="text-center text-gray-600">
-            Don't have an account?{" "}
-            <a href="/register" className="text-[#64b5f6] hover:underline">
-              Create one
+            Already have an account?{" "}
+            <a href="/login" className="text-[#64b5f6] hover:underline">
+              Sign in
             </a>
           </p>
         </Form>
       </CardContent>
     </Card>
   );
-}
+} 

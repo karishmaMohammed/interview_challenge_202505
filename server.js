@@ -40,7 +40,26 @@ if (viteDevServer) {
 // more aggressive with this caching.
 app.use(express.static("build/client", { maxAge: "1h" }));
 
-app.use(morgan("tiny"));
+// Custom logging format that excludes certain paths
+const morganFormat = ':method :url :status :response-time ms - :res[content-length]';
+const morganSkip = (req, res) => {
+  // Skip logging for certain paths
+  const skipPaths = [
+    '/.well-known/appspecific/com.chrome.devtools.json',
+    '/sw.js',
+    '/__manifest',
+    '/assets/'
+  ];
+  return skipPaths.some(path => req.url.startsWith(path));
+};
+
+app.use(morgan(morganFormat, { skip: morganSkip }));
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 // handle SSR requests
 app.all("*", remixHandler);

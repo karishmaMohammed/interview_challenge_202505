@@ -2,7 +2,8 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { NoteDetail } from "~/components/notes/note-detail";
 import { NoteDetailSkeleton } from "~/components/notes/note-detail-skeleton";
-import { getNoteById } from "~/services/notes.server";
+import { getNoteByIdAndUser } from "~/services/notes.server";
+import { requireUserId } from "~/services/session.server";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const noteId = parseInt(params.id || "", 10);
@@ -11,7 +12,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response("Invalid note ID", { status: 400 });
   }
 
-  const note = await getNoteById(noteId);
+  const userId = await requireUserId(request);
+  const note = await getNoteByIdAndUser(noteId, userId);
   if (!note) {
     throw new Response("Note not found", { status: 404 });
   }

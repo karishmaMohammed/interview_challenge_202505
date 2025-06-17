@@ -1,50 +1,63 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useActionData, useNavigation } from "@remix-run/react";
-import { LoginForm } from "~/components/auth/login-form";
-import { authenticateUser } from "~/services/auth.server";
+import { RegisterForm } from "~/components/auth/register-form";
+import { createUser, getUserByEmail } from "~/services/auth.server";
 import { createUserSession } from "~/services/session.server";
+import { z } from "zod";
+
+const RegisterSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
   const redirectTo = (formData.get("redirectTo") as string) || "/notes";
 
-  // Validate form data
-  if (!email || !password) {
-    return json(
-      {
-        errors: {
-          email: ["Email is required"],
-          password: ["Password is required"],
-        },
-      },
-      { status: 400 }
-    );
-  }
-
   try {
-    // Authenticate user
-    const user = await authenticateUser(email, password);
-    if (!user) {
+    // Validate form data
+    const validatedData = RegisterSchema.parse({
+      email,
+      password,
+      confirmPassword,
+    });
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(validatedData.email);
+    if (existingUser) {
       return json(
         {
           errors: {
-            email: ["Invalid email or password"],
+            email: ["A user with this email already exists"],
           },
         },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
-    // Create session
+    // Create new user
+    const user = await createUser(validatedData.email, validatedData.password);
+
+    // Create session and redirect
     return createUserSession(user.id, redirectTo);
   } catch (error) {
-    console.error("Login error:", error);
+    if (error instanceof z.ZodError) {
+      const errors = error.flatten().fieldErrors;
+      return json({ errors }, { status: 400 });
+    }
+
+    console.error("Registration error:", error);
     return json(
       {
         errors: {
-          email: ["An error occurred during login"],
+          email: ["An error occurred during registration"],
         },
       },
       { status: 500 }
@@ -52,9 +65,9 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const actionData = useActionData<{
-    errors?: { email?: string[]; password?: string[] };
+    errors?: { email?: string[]; password?: string[]; confirmPassword?: string[] };
   }>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -73,7 +86,7 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <h1 className="text-6xl font-bold text-[#64b5f6]">Notes</h1>
         </div>
-        <LoginForm
+        <RegisterForm
           errors={actionData?.errors}
           isSubmitting={isSubmitting}
           redirectTo="/notes"
@@ -81,4 +94,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+} 

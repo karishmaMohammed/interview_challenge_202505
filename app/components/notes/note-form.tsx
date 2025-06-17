@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { Form, useActionData, useNavigation, Link } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -38,6 +38,7 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
           defaultValue={defaultValues.title}
           required
           maxLength={255}
+          className="focus:border-[#c2e7d9] focus:ring-[#c2e7d9]"
           aria-invalid={actionData?.errors?.title ? true : undefined}
           aria-errormessage={actionData?.errors?.title?.join(", ")}
         />
@@ -58,6 +59,7 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
           rows={5}
           maxLength={10000}
           placeholder="Write your note here..."
+          className="focus:border-[#c2e7d9] focus:ring-[#c2e7d9]"
           aria-invalid={actionData?.errors?.description ? true : undefined}
           aria-errormessage={actionData?.errors?.description?.join(", ")}
         />
@@ -68,9 +70,21 @@ export function NoteForm({ defaultValues = {}, onSuccess }: NoteFormProps) {
         )}
       </div>
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving..." : "Save Note"}
-      </Button>
+      <div className="flex items-center gap-4 pt-4">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-[#c2e7d9] text-gray-800 hover:bg-[#afdfd0] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-semibold rounded-xl"
+        >
+          {isSubmitting ? "Saving..." : "Save Note"}
+        </Button>
+        <Link
+          to="/notes"
+          className="inline-flex items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#ffd7d7] text-gray-800 hover:bg-[#ffc7c7] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 h-10 px-4 py-2"
+        >
+          Cancel
+        </Link>
+      </div>
     </Form>
   );
 }
