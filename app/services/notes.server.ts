@@ -65,7 +65,7 @@ export async function toggleFavorite(noteId: number, userId: number): Promise<No
   const [note] = await db
     .update(notes)
     .set({
-      isFavorite: sql`CASE WHEN ${notes.isFavorite} = 1 THEN 0 ELSE 1 END`,
+      isFavorite: sql`CASE WHEN ${notes.isFavorite} = true THEN false ELSE true END`,
     })
     .where(sql`${notes.id} = ${noteId} AND ${notes.userId} = ${userId}`)
     .returning();

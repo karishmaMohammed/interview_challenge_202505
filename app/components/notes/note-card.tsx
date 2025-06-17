@@ -55,6 +55,17 @@ export function NoteCard({ note }: NoteCardProps) {
         <p className="text-xs text-muted-foreground">
           {formatRelativeTime(note.createdAt)}
         </p>
+      
+        <Form method="post" action={`/notes/${note.id}/toggle-favorite`}>
+          <button
+            type="submit"
+            className="ml-auto text-yellow-500 hover:text-yellow-600"
+            title={note.isFavorite ? "Unstar" : "Star"}
+          >
+            {note.isFavorite ? "⭐" : "☆"}
+          </button>
+        </Form>
+
       </CardFooter>
     </Card>
   );
